@@ -27,10 +27,9 @@ The Binance Margin Tracker is a Python application that allows users to track th
    ```
 
 3. **Set up your Binance API credentials:**
-   Build a .env file to store the binance api
-   BINANCE_API_KEY=xxxxxxxxxxx
-   BINANCE_API_SECRET=xxxxxxxxxx
-   Ensure you have your Binance API key and secret. You may need to modify the `binance_api.py` file to include your credentials.
+   Build a `.env` file to store the binance api
+   BINANCE_API_KEY=xxxxxxxxxxx (Public Key)
+   BINANCE_API_SECRET=xxxxxxxxxx (Secret Key)
 
 ## Usage
 
