@@ -1,0 +1,11 @@
+/venv
+*.pyc
+*.pyc~
+*/.DS_Store
+dist/
+build/
+*.cpython-312.pyc
+*.cpython-312.pyc~
+__pycache__/*
+.env
+*.env
