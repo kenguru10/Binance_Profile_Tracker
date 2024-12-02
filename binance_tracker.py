@@ -7,10 +7,10 @@ from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 class BinanceMarginTracker:
-    def __init__(self, date_type):
-        self.api = BinanceAPI(date_type)  # Initialize your Binance API client
+    def __init__(self):
         self.console = Console()  # Initialize rich console for better UI
-        self.date_type = date_type
+        self.date_type = "day"
+        self.api = BinanceAPI(self.date_type)  # Initialize your Binance API client
 
     def get_margin_account_info(self):
         # Fetch margin account information
@@ -164,7 +164,8 @@ class BinanceMarginTracker:
         self.console.print("[bold green]1. Display margin account info")
         self.console.print("[bold green]2. Display recent trades")
         self.console.print("[bold green]3. Display trade analysis")
-        self.console.print("[bold green]4. Exit")
+        self.console.print("[bold green]4. Change interval")
+        self.console.print("[bold green]5. Exit")
         choice = self.console.input("[bold green]Enter your choice: ")
         return choice
 
@@ -187,42 +188,59 @@ class BinanceMarginTracker:
                     self.display_margin_info(margin_info)
                     
             elif choice == "2":
-                # Fetch and process trades
-                task1 = progress.add_task("[cyan]Fetching margin account info...", total=1)
-                margin_info = self.get_margin_account_info()
-                progress.update(task1, completed=0.5)
-                task2 = progress.add_task("[cyan]Processing trades...", total=2)  # Total steps for processing trades
-                coins = self.get_all_coins(margin_info)
-                progress.update(task2, completed=0.5)  # Update to 50% after fetching coins
-                all_trades = self.get_all_cross_trades(coins, progress)
-                recent_trades = self.api.get_recent_trades(all_trades)
-                progress.update(task2, completed=1.0)  # Complete the task
-                progress.remove_task(task1)  # Clear the fetching text after loading
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    console=self.console
+                ) as progress:
+                    # Fetch and process trades
+                    task1 = progress.add_task("[cyan]Fetching margin account info...", total=1)
+                    margin_info = self.get_margin_account_info()
+                    progress.update(task1, completed=0.5)
+                    task2 = progress.add_task("[cyan]Processing trades...", total=2)  # Total steps for processing trades
+                    coins = self.get_all_coins(margin_info)
+                    progress.update(task2, completed=0.5)  # Update to 50% after fetching coins
+                    all_trades = self.get_all_cross_trades(coins, progress)
+                    recent_trades = self.api.get_recent_trades(all_trades)
+                    progress.update(task2, completed=1.0)  # Complete the task
+                    progress.remove_task(task1)  # Clear the fetching text after loading
                 
-                self.display_recent_trades(recent_trades)
+                    self.display_recent_trades(recent_trades)
                 
             elif choice == "3":
-                # Fetch and process trades
-                task1 = progress.add_task("[cyan]Fetching margin account info...", total=1)
-                margin_info = self.get_margin_account_info()
-                progress.update(task1, completed=1.0)
-                progress.remove_task(task1)  # Clear the fetching text after loading
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    console=self.console
+                ) as progress:
+                    # Fetch and process trades
+                    task1 = progress.add_task("[cyan]Fetching margin account info...", total=1)
+                    margin_info = self.get_margin_account_info()
+                    progress.update(task1, completed=1.0)
+                    progress.remove_task(task1)  # Clear the fetching text after loading
 
-                task2 = progress.add_task("[cyan]Processing trades...", total=2)  # Total steps for processing trades
-                coins = self.get_all_coins(margin_info)
-                progress.update(task2, completed=0.5)  # Update to 50% after fetching coins
-                all_trades = self.get_all_cross_trades(coins, progress)
-                recent_trades = self.api.get_recent_trades(all_trades)
-                progress.update(task2, completed=1.0)  # Complete the task
-                progress.remove_task(task2)  # Clear the fetching text after loading
-                
-                # Sort and display results
-                recent_trades.sort(key=lambda trade: trade['time'], reverse=True)
-                self.display_trade_analysis(recent_trades)
+                    task2 = progress.add_task("[cyan]Processing trades...", total=2)  # Total steps for processing trades
+                    coins = self.get_all_coins(margin_info)
+                    progress.update(task2, completed=0.5)  # Update to 50% after fetching coins
+                    all_trades = self.get_all_cross_trades(coins, progress)
+                    recent_trades = self.api.get_recent_trades(all_trades)
+                    progress.update(task2, completed=1.0)  # Complete the task
+                    progress.remove_task(task2)  # Clear the fetching text after loading
+                    
+                    # Sort and display results
+                    recent_trades.sort(key=lambda trade: trade['time'], reverse=True)
+                    self.display_recent_trades(recent_trades)
+                    self.display_trade_analysis(recent_trades)
 
             elif choice == "4":
+                new_interval = self.console.input("[bold green]Enter new interval (e.g., 'day', 'week', 'month'): ")
+                self.date_type = new_interval  # Update the interval
+                self.api = BinanceAPI(self.date_type)  # Update the API client
+                self.console.print(f"[bold cyan]Interval changed to: {self.date_type}")
+                
+            elif choice == "5":
                 break
 
 if __name__ == "__main__":
-    tracker = BinanceMarginTracker("week")
+    tracker = BinanceMarginTracker()
     tracker.run()
