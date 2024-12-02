@@ -37,10 +37,17 @@ class BinanceAPI:
         week_dates = [today - timedelta(days=x) for x in range(7)]
         return week_dates
     
-    def get_month_dates(self):
+    def get_current_month_dates(self):
         today = datetime.now().date()
-        month_dates = [today - timedelta(days=x) for x in range(30)]
-        return month_dates
+        first_day_of_month = today.replace(day=1)  # Get the first day of the current month
+        month_dates = [first_day_of_month + timedelta(days=x) for x in range((today - first_day_of_month).days + 1)]
+        return month_dates  # Return dates for the current month
+
+    def get_last_month_dates(self):
+        today = datetime.now().date()
+        first_day_of_last_month = (today.replace(day=1) - timedelta(days=1)).replace(day=1)  # Get the first day of the last month
+        last_month_dates = [first_day_of_last_month + timedelta(days=x) for x in range((today - first_day_of_last_month).days + 1)]
+        return last_month_dates  # Return dates for the last month
     
     def get_recent_trades(self, trades):
         from datetime import datetime
@@ -52,9 +59,12 @@ class BinanceAPI:
         elif self.date_type == "week":
             week_trades = [trade for trade in trades if datetime.fromtimestamp(trade['time'] / 1000).date() in self.get_week_dates()]
             return week_trades  # Return trades that occurred this week
-        elif self.date_type == "month":
-            month_trades = [trade for trade in trades if datetime.fromtimestamp(trade['time'] / 1000).date() in self.get_month_dates()]
+        elif self.date_type == "tmonth":
+            month_trades = [trade for trade in trades if datetime.fromtimestamp(trade['time'] / 1000).date() in self.get_current_month_dates()]
             return month_trades  # Return trades that occurred this month
+        elif self.date_type == "lmonth":
+            last_month_trades = [trade for trade in trades if datetime.fromtimestamp(trade['time'] / 1000).date() in self.get_last_month_dates()]
+            return last_month_trades  # Return trades that occurred last month
 
     def analyze_trades(self, trades):
         total_profit_loss = 0.0

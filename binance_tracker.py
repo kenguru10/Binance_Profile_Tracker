@@ -233,7 +233,7 @@ class BinanceMarginTracker:
                     self.display_trade_analysis(recent_trades)
 
             elif choice == "4":
-                new_interval = self.console.input("[bold green]Enter new interval (e.g., 'day', 'week', 'month'): ")
+                new_interval = self.console.input("[bold green]Enter new interval (e.g., 'day', 'week', 'tmonth', 'lmonth'): ")
                 self.date_type = new_interval  # Update the interval
                 self.api = BinanceAPI(self.date_type)  # Update the API client
                 self.console.print(f"[bold cyan]Interval changed to: {self.date_type}")
