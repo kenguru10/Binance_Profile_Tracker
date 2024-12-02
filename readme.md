@@ -17,7 +17,7 @@ The Binance Margin Tracker is a Python application that allows users to track th
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/binance_margin_tracker.git
+   git clone https://github.com/kenguru10/binance_margin_tracker.git
    cd binance_margin_tracker
    ```
 
