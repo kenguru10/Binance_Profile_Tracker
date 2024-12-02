@@ -158,34 +158,70 @@ class BinanceMarginTracker:
         self.console.print(f"Win Rate: {win_rate:.2f}%")
         self.console.print(f"Total Trades: {total_trades}")
         self.console.print(f"Skipped Symbols: {self.api.get_skipped_symbols()}")
+        
+    def display_menu(self):
+        self.console.print("[bold green]Select an option:")
+        self.console.print("[bold green]1. Display margin account info")
+        self.console.print("[bold green]2. Display recent trades")
+        self.console.print("[bold green]3. Display trade analysis")
+        self.console.print("[bold green]4. Exit")
+        choice = self.console.input("[bold green]Enter your choice: ")
+        return choice
 
     def run(self):
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=self.console
-        ) as progress:
-            # Fetch margin account info
-            task1 = progress.add_task("[cyan]Fetching margin account info...", total=1)
-            margin_info = self.get_margin_account_info()
-            progress.update(task1, completed=1.0)
-            progress.remove_task(task1)  # Clear the fetching text after loading
+        while True:
+            choice = self.display_menu()
 
-            self.display_margin_info(margin_info)
-            
-            # Fetch and process trades
-            task2 = progress.add_task("[cyan]Processing trades...", total=2)  # Total steps for processing trades
-            coins = self.get_all_coins(margin_info)
-            progress.update(task2, completed=0.5)  # Update to 50% after fetching coins
-            all_trades = self.get_all_cross_trades(coins, progress)
-            recent_trades = self.api.get_recent_trades(all_trades)
-            progress.update(task2, completed=1.0)  # Complete the task
-            progress.remove_task(task2)  # Clear the fetching text after loading
-            
-            # Sort and display results
-            recent_trades.sort(key=lambda trade: trade['time'], reverse=True)
-            self.display_recent_trades(recent_trades)
-            self.display_trade_analysis(recent_trades)
+            if choice == "1":
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    console=self.console
+                ) as progress:
+                    # Fetch margin account info
+                    task = progress.add_task("[cyan]Fetching margin account info...", total=1)
+                    margin_info = self.get_margin_account_info()
+                    progress.update(task, completed=1.0)
+                    progress.remove_task(task)  # Clear the fetching text after loading
+
+                    self.display_margin_info(margin_info)
+                    
+            elif choice == "2":
+                # Fetch and process trades
+                task1 = progress.add_task("[cyan]Fetching margin account info...", total=1)
+                margin_info = self.get_margin_account_info()
+                progress.update(task1, completed=0.5)
+                task2 = progress.add_task("[cyan]Processing trades...", total=2)  # Total steps for processing trades
+                coins = self.get_all_coins(margin_info)
+                progress.update(task2, completed=0.5)  # Update to 50% after fetching coins
+                all_trades = self.get_all_cross_trades(coins, progress)
+                recent_trades = self.api.get_recent_trades(all_trades)
+                progress.update(task2, completed=1.0)  # Complete the task
+                progress.remove_task(task1)  # Clear the fetching text after loading
+                
+                self.display_recent_trades(recent_trades)
+                
+            elif choice == "3":
+                # Fetch and process trades
+                task1 = progress.add_task("[cyan]Fetching margin account info...", total=1)
+                margin_info = self.get_margin_account_info()
+                progress.update(task1, completed=1.0)
+                progress.remove_task(task1)  # Clear the fetching text after loading
+
+                task2 = progress.add_task("[cyan]Processing trades...", total=2)  # Total steps for processing trades
+                coins = self.get_all_coins(margin_info)
+                progress.update(task2, completed=0.5)  # Update to 50% after fetching coins
+                all_trades = self.get_all_cross_trades(coins, progress)
+                recent_trades = self.api.get_recent_trades(all_trades)
+                progress.update(task2, completed=1.0)  # Complete the task
+                progress.remove_task(task2)  # Clear the fetching text after loading
+                
+                # Sort and display results
+                recent_trades.sort(key=lambda trade: trade['time'], reverse=True)
+                self.display_trade_analysis(recent_trades)
+
+            elif choice == "4":
+                break
 
 if __name__ == "__main__":
     tracker = BinanceMarginTracker("week")
