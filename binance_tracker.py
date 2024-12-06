@@ -113,8 +113,8 @@ class BinanceMarginTracker:
         self.console.print(table)
 
     def display_trade_analysis(self, recent_trades):
-        # Calculate total profit/loss and win rate from trades
-        total_profit_loss = 0
+        total_profit = 0  # Initialize total profit
+        total_loss = 0     # Initialize total loss
         total_investment = 0  # Initialize total investment
         winning_trades = 0
         total_trades = len(recent_trades) // 2  # Divide total trades by 2
@@ -140,11 +140,16 @@ class BinanceMarginTracker:
                 
                 # Calculate profit/loss for this trade
                 trade_pl = (curr_price - prev_price) * quantity
-                total_profit_loss += trade_pl
-                total_investment += prev_price * quantity  # Update total investment
-                
                 if trade_pl > 0:
+                    total_profit += trade_pl  # Add to total profit
                     winning_trades += 1
+                else:
+                    total_loss += -trade_pl  # Add to total loss (subtracting a negative value)
+                
+                total_investment += prev_price * quantity  # Update total investment
+        
+        # Calculate net profit/loss
+        total_profit_loss = total_profit - total_loss
         
         # Calculate win rate
         win_rate = (winning_trades / total_trades * 100) if total_trades > 0 else 0
@@ -153,7 +158,9 @@ class BinanceMarginTracker:
         profit_loss_percentage = (total_profit_loss / total_investment * 100) if total_investment > 0 else 0  # Calculate percentage
         
         # Display results
-        self.console.print(f"Total Profit/Loss: {total_profit_loss:.2f}")
+        self.console.print(f"Total Profit: ${total_profit:.2f}")
+        self.console.print(f"Total Loss: ${total_loss:.2f}")
+        self.console.print(f"Net Profit/Loss: ${total_profit_loss:.2f}")
         self.console.print(f"Profit/Loss Percentage: {profit_loss_percentage:.2f}%")  # Display percentage
         self.console.print(f"Win Rate: {win_rate:.2f}%")
         self.console.print(f"Total Trades: {total_trades}")
